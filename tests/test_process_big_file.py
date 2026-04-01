@@ -1,5 +1,8 @@
 import unittest
 from unittest.mock import patch
+import subprocess
+import sys
+from pathlib import Path
 
 import pandas as pd
 
@@ -147,6 +150,35 @@ class TestPandas3StringDtypeCompatibility(unittest.TestCase):
 
         self.assertEqual(initialized.loc[0, "★盈利环比变化"], "+12%")
         self.assertEqual(initialized.loc[0, "★盈利稳定性"], "高稳定(88分)")
+
+
+class TestHeadlessImportCompatibility(unittest.TestCase):
+    def test_imports_without_tkinter_available(self):
+        project_root = Path(__file__).resolve().parents[1]
+        script = """
+import builtins
+real_import = builtins.__import__
+
+def blocked_import(name, globals=None, locals=None, fromlist=(), level=0):
+    if name == "tkinter" or name.startswith("tkinter."):
+        raise ImportError("tkinter unavailable in runtime")
+    return real_import(name, globals, locals, fromlist, level)
+
+builtins.__import__ = blocked_import
+import process_big_file
+assert "columns" in process_big_file.DEFAULT_CONFIG
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=str(project_root),
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout={result.stdout}\nstderr={result.stderr}",
+        )
 
 
 if __name__ == "__main__":

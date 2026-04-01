@@ -4,8 +4,6 @@
 
 import sys
 import os
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
 from datetime import datetime, timedelta
 import threading
 import json
@@ -13,6 +11,27 @@ import copy
 import warnings
 
 warnings.filterwarnings("ignore")
+
+try:
+    import tkinter as tk
+    from tkinter import ttk, filedialog, messagebox
+
+    HAS_TKINTER = True
+except ImportError:
+    tk = None
+    ttk = None
+    filedialog = None
+    messagebox = None
+    HAS_TKINTER = False
+
+
+def _require_tkinter():
+    if not HAS_TKINTER:
+        raise RuntimeError(
+            "当前运行环境缺少 tkinter，无法启动桌面版 GUI。"
+            "请安装 Tk 运行时，或改用 streamlit_app.py 在线版。"
+        )
+
 
 try:
     import pandas as pd
@@ -376,6 +395,7 @@ class ConfigManager:
 
 class App:
     def __init__(self, root):
+        _require_tkinter()
         self.root = root
         self.style = ttk.Style()
         self.root.title("BI数据预处理工具 v2.0")
@@ -1515,6 +1535,11 @@ class App:
 
 
 if __name__ == "__main__":
+    if not HAS_TKINTER:
+        print("错误: 当前运行环境缺少 tkinter，无法启动桌面版 GUI。")
+        print("请安装 Tk 运行时，或改用 streamlit_app.py 在线版。")
+        sys.exit(1)
+
     if not HAS_PANDAS:
         root = tk.Tk()
         root.withdraw()
