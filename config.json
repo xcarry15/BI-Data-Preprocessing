@@ -1,0 +1,46 @@
+{
+  "columns": {
+    "store_code": "门店编码",
+    "opening_date": "开业时间",
+    "monitor_date": "监控日期",
+    "approval_status": "审批状态",
+    "profit_judgment": "盈利性判断",
+    "delivery_days": "外卖营业天数",
+    "daily_revenue": "日商_预计达成比例",
+    "delivery_revenue": "外卖日商_预计达成比例",
+    "dinein_revenue": "到店日商_预计达成比例"
+  },
+  "output_fields": {
+    "latest_approval": true,
+    "latest_profit": true,
+    "profit_50": true,
+    "total_profit_days": true,
+    "total_unprofit_days": true,
+    "profit_ratio": true,
+    "total_monitor_days": true,
+    "total_delivery_days": true,
+    "dinein_ratio": true,
+    "delivery_ratio": true,
+    "approval_consistency": true,
+    "profit_consistency": true,
+    "profit_trend": true,
+    "profit_trend_slope": true,
+    "profit_monthly_change": true,
+    "profit_stability": true,
+    "data_observation_days": true
+  },
+  "format": {
+    "date_format": "%Y/%m/%d",
+    "encoding": "utf-8-sig",
+    "decimal_places": 4
+  },
+  "output_mode": "detail",
+  "aggregation": {
+    "profit_threshold": 50,
+    "exclude_initial_days": 60,
+    "exclude_based_on": "opening_date",
+    "group_by": "门店编码",
+    "trend_window": 15,
+    "output_mode": "detail"
+  }
+}
