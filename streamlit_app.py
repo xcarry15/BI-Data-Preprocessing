@@ -233,11 +233,11 @@ def _output_field_editor(cfg):
     }
     op1, op2, _ = st.columns([1, 1, 3])
     with op1:
-        if st.button("全选", key="select_all_fields", use_container_width=True):
+        if st.button("全选", key="select_all_fields", width="stretch"):
             for key in labels:
                 st.session_state[f"{_OUT_PREFIX}{key}"] = True
     with op2:
-        if st.button("全不选", key="clear_all_fields", use_container_width=True):
+        if st.button("全不选", key="clear_all_fields", width="stretch"):
             for key in labels:
                 st.session_state[f"{_OUT_PREFIX}{key}"] = False
 
@@ -361,7 +361,7 @@ with left:
     run_btn = st.button(
         "开始处理",
         type="primary",
-        use_container_width=True,
+        width="stretch",
         disabled=uploaded is None,
     )
 
@@ -412,7 +412,7 @@ if uploaded is not None and run_btn:
 if isinstance(st.session_state.get("result_df"), pd.DataFrame):
     result_df = st.session_state["result_df"]
     st.success(f"处理完成: {len(result_df)} 行, {len(result_df.columns)} 列")
-    st.dataframe(result_df.head(100), use_container_width=True, height=330)
+    st.dataframe(result_df.head(100), width="stretch", height=330)
     csv_bytes = dataframe_to_csv_bytes(
         result_df,
         encoding=st.session_state["cfg"]["format"].get("encoding", "utf-8-sig"),
@@ -422,5 +422,5 @@ if isinstance(st.session_state.get("result_df"), pd.DataFrame):
         data=csv_bytes,
         file_name=st.session_state.get("download_name", "output.csv"),
         mime="text/csv",
-        use_container_width=True,
+        width="stretch",
     )
