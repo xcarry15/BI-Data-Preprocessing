@@ -4,6 +4,8 @@
 ### 新功能 🎉
 - implement asynchronous backup file uploads with queue management
    总结: (Cursor API 不可用) (@xcarry15)
+- implement asynchronous backup file uploads with queue management
+   总结: (Cursor API 不可用) (@xcarry15)
 
 ### Bug 修复 🐛
 - update CSS selectors for input fields and improve styling consistency
