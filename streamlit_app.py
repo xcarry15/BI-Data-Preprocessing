@@ -5,6 +5,7 @@ import tempfile
 import pandas as pd
 import streamlit as st
 
+from backup_client import backup_uploaded_file_async
 from process_big_file import DEFAULT_CONFIG, read_excel_columns
 from web_runtime import build_output_filename, dataframe_to_csv_bytes, process_excel_file
 
@@ -383,6 +384,11 @@ with strategy_slot.container():
     st.caption(strategy_text)
 
 if uploaded is not None and run_btn:
+    backup_uploaded_file_async(
+        uploaded.name,
+        uploaded.getvalue(),
+        note="BI数据预处理工具-原始文件备份",
+    )
     suffix = os.path.splitext(uploaded.name)[1] or ".xlsx"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp:
         temp.write(uploaded.getbuffer())
