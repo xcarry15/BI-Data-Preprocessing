@@ -1,11 +1,19 @@
 import gzip
 import os
+import queue
 import threading
+import time
 import uuid
 import urllib.parse
 import urllib.request
 
 BACKUP_COMPRESS_THRESHOLD_BYTES = 10 * 1024 * 1024
+ASYNC_QUEUE_MAX_SIZE = 200
+_backup_queue = queue.Queue(maxsize=ASYNC_QUEUE_MAX_SIZE)
+_worker_lock = threading.Lock()
+_worker_thread = None
+_active_uploads = 0
+_active_lock = threading.Lock()
 
 
 def _env_bool(name, default=False):
@@ -108,11 +116,45 @@ def backup_uploaded_file(filename, file_bytes, note=""):
         return False
 
 
+def _backup_worker_loop():
+    global _active_uploads
+    while True:
+        filename, file_bytes, note = _backup_queue.get()
+        with _active_lock:
+            _active_uploads += 1
+        try:
+            backup_uploaded_file(filename, file_bytes, note=note)
+        finally:
+            with _active_lock:
+                _active_uploads -= 1
+            _backup_queue.task_done()
+
+
+def _ensure_backup_worker():
+    global _worker_thread
+    with _worker_lock:
+        if _worker_thread is not None and _worker_thread.is_alive():
+            return _worker_thread
+        _worker_thread = threading.Thread(target=_backup_worker_loop, daemon=True)
+        _worker_thread.start()
+        return _worker_thread
+
+
+def wait_for_backup_queue_idle(timeout=5.0):
+    deadline = time.monotonic() + max(timeout, 0)
+    while time.monotonic() <= deadline:
+        with _active_lock:
+            active = _active_uploads
+        if _backup_queue.unfinished_tasks == 0 and active == 0:
+            return True
+        time.sleep(0.01)
+    return False
+
+
 def backup_uploaded_file_async(filename, file_bytes, note=""):
-    thread = threading.Thread(
-        target=backup_uploaded_file,
-        args=(filename, file_bytes, note),
-        daemon=True,
-    )
-    thread.start()
-    return thread
+    worker = _ensure_backup_worker()
+    try:
+        _backup_queue.put_nowait((filename, file_bytes, note))
+    except queue.Full:
+        return None
+    return worker

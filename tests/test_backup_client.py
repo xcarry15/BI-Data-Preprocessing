@@ -1,4 +1,6 @@
 import os
+import threading
+import time
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -87,6 +89,31 @@ class TestBackupClient(unittest.TestCase):
         ):
             result = backup_client.backup_uploaded_file("a.xlsx", b"123")
         self.assertFalse(result)
+
+    def test_async_upload_queues_later_file_until_current_finishes(self):
+        first_started = threading.Event()
+        release_first = threading.Event()
+        handled = []
+
+        def fake_upload(filename, file_bytes, note=""):
+            if filename == "first.xlsx":
+                first_started.set()
+                release_first.wait(timeout=2)
+            handled.append(filename)
+            return True
+
+        with patch("backup_client.backup_uploaded_file", side_effect=fake_upload):
+            backup_client.backup_uploaded_file_async("first.xlsx", b"1")
+            self.assertTrue(first_started.wait(timeout=1))
+            backup_client.backup_uploaded_file_async("second.xlsx", b"2")
+
+            time.sleep(0.05)
+            self.assertEqual(handled, [])
+
+            release_first.set()
+            self.assertTrue(backup_client.wait_for_backup_queue_idle(timeout=2))
+
+        self.assertEqual(handled, ["first.xlsx", "second.xlsx"])
 
 
 if __name__ == "__main__":
