@@ -1,5 +1,4 @@
 import copy
-import json
 import os
 import tempfile
 
@@ -9,48 +8,75 @@ import streamlit as st
 from process_big_file import DEFAULT_CONFIG, read_excel_columns
 from web_runtime import build_output_filename, dataframe_to_csv_bytes, process_excel_file
 
+# Widget key prefixes
+_COL_PREFIX = "col_"
+_OUT_PREFIX = "out_"
 
-st.set_page_config(page_title="BI数据处理工具（在线版）", layout="wide")
+st.set_page_config(page_title="BI数据预处理（在线版）", layout="wide")
 st.markdown(
     """
 <style>
 :root {
-    --bg: #f5f7fb;
+    --bg: #f4f7fc;
     --panel: #ffffff;
-    --line: #dde3ee;
-    --text: #15233b;
-    --muted: #5e6e8a;
-    --accent: #1f4ea8;
+    --line: #d5ddeb;
+    --text: #14253f;
+    --muted: #5d6f8f;
+    --accent: #1a4e99;
+    --accent-soft: #eaf1ff;
+    --title: #10223c;
+    --badge: #345d9f;
+    --heading: #173157;
 }
 .stApp {
-    background: linear-gradient(180deg, #f5f7fb 0%, #f3f5f9 100%);
+    background: linear-gradient(180deg, #f4f7fc 0%, #f1f5fb 100%);
     color: var(--text);
 }
 .block-container {
     padding-top: 0.55rem;
-    padding-bottom: 0.65rem;
+    padding-bottom: 0.8rem;
     max-width: 1520px;
 }
-h1 {
-    font-size: 1.22rem;
-    letter-spacing: 0.2px;
-    margin: 0.1rem 0 0.45rem 0;
-}
-.bench-header {
-    border: 1px solid var(--line);
-    background: #fff;
-    border-radius: 9px;
-    padding: 0.4rem 0.7rem;
+.hero-shell {
     margin-bottom: 0.45rem;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
 }
-.bench-header .sub {
+.hero-strip {
+    display: none;
+}
+.hero-main {
+    padding: 0.72rem 0.95rem 0.68rem 0.95rem;
+}
+.hero-title {
+    margin: 0;
+    font-size: 1.12rem;
+    line-height: 1.22;
+    letter-spacing: 0.1px;
+    color: var(--title);
+}
+.hero-sub {
     color: var(--muted);
-    font-size: 0.78rem;
-    margin-top: -0.1rem;
+    font-size: 0.8rem;
+    margin-top: 0.18rem;
+}
+.hero-meta {
+    display: inline-block;
+    margin-top: 0.45rem;
+    padding: 0.16rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid #c3d1e9;
+    background: var(--accent-soft);
+    color: var(--badge);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
 }
 h3 {
     font-size: 0.97rem;
-    margin: 0 0 0.32rem 0;
+    margin: 0 0 0.35rem 0;
+    color: var(--heading);
 }
 p, label, span, div {
     font-size: 0.9rem;
@@ -59,15 +85,16 @@ div[data-testid="stVerticalBlock"] > div:has(> div > div > div > h3) {
     gap: 0.15rem;
 }
 div[data-testid="stFileUploaderDropzone"] {
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid var(--line);
-    background: #f9fbff;
-    padding: 0.4rem 0.5rem;
+    background: #f6f9ff;
+    padding: 0.46rem 0.54rem;
 }
 div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input,
 div[data-testid="stSelectbox"] > div > div {
     min-height: 34px;
+    border-radius: 8px;
 }
 div[data-testid="stTextInput"] label,
 div[data-testid="stNumberInput"] label,
@@ -78,17 +105,29 @@ div[data-testid="stCheckbox"] label {
 }
 button[kind="primary"] {
     background: var(--accent);
-    border: 1px solid #194694;
+    border: 1px solid #164687;
 }
 div[data-baseweb="tab-list"] button {
-    height: 34px;
+    height: 33px;
     padding-top: 0;
     padding-bottom: 0;
+    border-radius: 6px 6px 0 0;
 }
 div[data-testid="stExpander"] {
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--panel);
+}
+@media (max-width: 768px) {
+    .hero-main {
+        padding: 0.62rem 0.72rem 0.6rem 0.72rem;
+    }
+    .hero-title {
+        font-size: 1rem;
+    }
+    .hero-sub {
+        font-size: 0.76rem;
+    }
 }
 </style>
 """,
@@ -96,9 +135,13 @@ div[data-testid="stExpander"] {
 )
 st.markdown(
     """
-<div class="bench-header">
-  <h1>BI数据预处理工具 v2.0（在线版）</h1>
-  <div class="sub">表单工作台</div>
+<div class="hero-shell">
+  <div class="hero-strip"></div>
+  <div class="hero-main">
+    <h1 class="hero-title">BI 数据预处理工具</h1>
+    <div class="hero-sub">面向数据分析场景的批量清洗与聚合工作台</div>
+    <div class="hero-meta">v2.0</div>
+  </div>
 </div>
 """,
     unsafe_allow_html=True,
@@ -157,12 +200,12 @@ def _compact_field_editor(cfg, detected_columns):
                     label,
                     options=options,
                     index=max(options.index(current), 0) if current in options else 0,
-                    key=f"col_{key}",
+                    key=f"{_COL_PREFIX}{key}",
                 )
                 cfg["columns"][key] = selected
             else:
                 cfg["columns"][key] = st.text_input(
-                    label, value=cfg["columns"].get(key, ""), key=f"col_{key}"
+                    label, value=cfg["columns"].get(key, ""), key=f"{_COL_PREFIX}{key}"
                 )
 
 
@@ -191,11 +234,11 @@ def _output_field_editor(cfg):
     with op1:
         if st.button("全选", key="select_all_fields", use_container_width=True):
             for key in labels:
-                cfg["output_fields"][key] = True
+                st.session_state[f"{_OUT_PREFIX}{key}"] = True
     with op2:
         if st.button("全不选", key="clear_all_fields", use_container_width=True):
             for key in labels:
-                cfg["output_fields"][key] = False
+                st.session_state[f"{_OUT_PREFIX}{key}"] = False
 
     cols = st.columns(4)
     for idx, key in enumerate(labels):
@@ -203,7 +246,7 @@ def _output_field_editor(cfg):
             cfg["output_fields"][key] = st.checkbox(
                 labels[key],
                 value=cfg["output_fields"].get(key, True),
-                key=f"out_{key}",
+                key=f"{_OUT_PREFIX}{key}",
             )
 
 
@@ -317,7 +360,6 @@ with left:
         disabled=uploaded is None,
     )
 
-    st.divider()
     strategy_slot = st.empty()
 
 with right:
@@ -328,20 +370,6 @@ with right:
         _output_field_editor(cfg)
     with tab3:
         _format_editor(cfg)
-
-with st.expander("高级配置 JSON", expanded=False):
-    raw_cfg = st.text_area(
-        "可直接修改完整配置",
-        value=json.dumps(cfg, ensure_ascii=False, indent=2),
-        height=220,
-        label_visibility="collapsed",
-    )
-    if st.button("应用 JSON 配置"):
-        try:
-            cfg = json.loads(raw_cfg)
-            st.success("已应用配置")
-        except json.JSONDecodeError as exc:
-            st.error(f"JSON 解析失败: {exc}")
 
 st.session_state["cfg"] = cfg
 strategy_text = (
