@@ -6,6 +6,32 @@ import backup_client
 
 
 class TestBackupClient(unittest.TestCase):
+    def test_large_file_is_compressed_before_upload(self):
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+        response.getcode.return_value = 200
+
+        large_bytes = b"a" * (10 * 1024 * 1024 + 1)
+
+        with patch.dict(
+            os.environ,
+            {
+                "FILE_BACKUP_ENABLED": "true",
+                "FILE_STORAGE_API_KEY": "test-key",
+                "FILE_BACKUP_PROJECT_ID": "bi-data",
+                "FILE_API_BASE": "https://api.tstwg.cn/api",
+            },
+            clear=False,
+        ), patch("backup_client.urllib.request.urlopen", return_value=response) as mocked_open:
+            result = backup_client.backup_uploaded_file("big.xlsx", large_bytes, note="数据备份")
+
+        self.assertTrue(result)
+        req = mocked_open.call_args.args[0]
+        body = req.data
+        self.assertIn(b'filename="big.xlsx.gz"', body)
+        self.assertIn(b"\x1f\x8b\x08", body)
+
     def test_upload_disabled_returns_false(self):
         with patch.dict(
             os.environ,

@@ -1,8 +1,11 @@
+import gzip
 import os
 import threading
 import uuid
 import urllib.parse
 import urllib.request
+
+BACKUP_COMPRESS_THRESHOLD_BYTES = 10 * 1024 * 1024
 
 
 def _env_bool(name, default=False):
@@ -61,6 +64,14 @@ def _build_multipart_payload(filename, file_bytes, note=""):
     return bytes(body), content_type
 
 
+def _prepare_backup_file(filename, file_bytes):
+    safe_name = filename or "upload.xlsx"
+    if len(file_bytes) <= BACKUP_COMPRESS_THRESHOLD_BYTES:
+        return safe_name, file_bytes
+    compressed_name = safe_name if safe_name.endswith(".gz") else f"{safe_name}.gz"
+    return compressed_name, gzip.compress(file_bytes)
+
+
 def backup_uploaded_file(filename, file_bytes, note=""):
     if not _env_bool("FILE_BACKUP_ENABLED", default=True):
         return False
@@ -73,7 +84,8 @@ def backup_uploaded_file(filename, file_bytes, note=""):
     if not api_key or not project_id or not file_bytes:
         return False
 
-    body, content_type = _build_multipart_payload(filename, file_bytes, note=note)
+    backup_filename, backup_file_bytes = _prepare_backup_file(filename, file_bytes)
+    body, content_type = _build_multipart_payload(backup_filename, backup_file_bytes, note=note)
     url = _build_upload_url(api_base, project_id)
 
     req = urllib.request.Request(
