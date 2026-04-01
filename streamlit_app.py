@@ -99,7 +99,6 @@ div[data-testid="stFileUploaderDropzone"] {
     padding: 0.46rem 0.54rem;
 }
 div[data-testid="stTextInput"] [data-baseweb="input"],
-div[data-testid="stNumberInput"] [data-baseweb="input"],
 div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
     min-height: 34px;
     border-radius: 8px;
@@ -109,13 +108,11 @@ div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
     transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
 div[data-testid="stTextInput"] [data-baseweb="input"]:hover,
-div[data-testid="stNumberInput"] [data-baseweb="input"]:hover,
 div[data-testid="stSelectbox"] [data-baseweb="select"] > div:hover {
     border-color: var(--input-hover);
     background: #ffffff;
 }
 div[data-testid="stTextInput"]:focus-within [data-baseweb="input"],
-div[data-testid="stNumberInput"]:focus-within [data-baseweb="input"],
 div[data-testid="stSelectbox"]:focus-within [data-baseweb="select"] > div {
     border-color: var(--input-focus);
     background: #ffffff;
@@ -128,14 +125,36 @@ div[data-testid="stNumberInput"] [data-baseweb="input"] input {
     box-shadow: none !important;
     color: var(--text);
 }
-div[data-testid="stNumberInput"] [data-baseweb="input"] {
-    background: var(--input-number-bg);
+div[data-testid="stNumberInput"] > div {
+    min-height: 34px;
+    border-radius: 8px;
+    border: 1.5px solid var(--input-border) !important;
+    background: var(--input-number-bg) !important;
+    overflow: hidden;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
-div[data-testid="stNumberInput"] [data-baseweb="input"] button {
+div[data-testid="stNumberInput"] > div:hover {
+    border-color: var(--input-hover) !important;
+    background: #ffffff !important;
+}
+div[data-testid="stNumberInput"]:focus-within > div {
+    border-color: var(--input-focus) !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+div[data-testid="stNumberInput"] [data-baseweb="input"] {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+div[data-testid="stNumberInput"] button {
     background: transparent !important;
     color: #3a537a !important;
+    border: none !important;
+    box-shadow: none !important;
 }
-div[data-testid="stNumberInput"] [data-baseweb="input"] button:hover {
+div[data-testid="stNumberInput"] button:hover {
     background: #e8f1ff !important;
 }
 div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
@@ -386,7 +405,7 @@ def _format_editor(cfg):
                 cfg["aggregation"]["trend_window"] = st.number_input(
                     label,
                     min_value=2,
-                    value=int(cfg["aggregation"].get("trend_window", 7)),
+                    value=int(cfg["aggregation"].get("trend_window", 30)),
                     step=1,
                     key="trend_window",
                 )
@@ -433,7 +452,7 @@ st.session_state["cfg"] = cfg
 strategy_text = (
     f"模式: {'聚合' if cfg.get('output_mode') == 'aggregated' else '详细'} | "
     f"阈值: {cfg['aggregation'].get('profit_threshold', 50)}% | "
-    f"趋势窗口: {cfg['aggregation'].get('trend_window', 7)}天 | "
+    f"趋势窗口: {cfg['aggregation'].get('trend_window', 30)}天 | "
     f"排除: {cfg['aggregation'].get('exclude_initial_days', 0)}天"
 )
 with strategy_slot.container():
