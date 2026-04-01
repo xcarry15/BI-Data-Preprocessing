@@ -342,7 +342,7 @@ DEFAULT_CONFIG = {
         "exclude_initial_days": 60,
         "exclude_based_on": "opening_date",
         "group_by": "门店编码",
-        "trend_window": 15,
+        "trend_window": 30,
     },
 }
 
@@ -748,7 +748,7 @@ class App:
         frame.pack(fill=tk.X, pady=1)
         ttk.Label(frame, text="趋势窗口", width=10).pack(side=tk.LEFT)
         self.trend_window_var = tk.IntVar(
-            value=self.config["aggregation"].get("trend_window", 7)
+            value=self.config["aggregation"].get("trend_window", 30)
         )
         trend_spin = ttk.Spinbox(
             frame, from_=3, to=30, textvariable=self.trend_window_var, width=8
@@ -846,10 +846,10 @@ class App:
         try:
             trend_val = self.trend_window_var.get()
             self.config["aggregation"]["trend_window"] = (
-                int(trend_val) if trend_val else 7
+                int(trend_val) if trend_val else 30
             )
         except (ValueError, TypeError):
-            self.config["aggregation"]["trend_window"] = 7
+            self.config["aggregation"]["trend_window"] = 30
         self.config["output_mode"] = self.output_mode_var.get()
         self.config["aggregation"]["output_mode"] = self.output_mode_var.get()
 
@@ -896,7 +896,7 @@ class App:
         out_fields = cfg["output_fields"]
         threshold = cfg["aggregation"]["profit_threshold"] / 100.0
         date_format = cfg["format"]["date_format"]
-        trend_window = cfg["aggregation"].get("trend_window", 7)
+        trend_window = cfg["aggregation"].get("trend_window", 30)
         group_col = resolve_group_column(cfg, cols)
 
         # 数据已通过 _preprocess_data 预处理，直接使用
@@ -1176,7 +1176,7 @@ class App:
         threshold = cfg["aggregation"]["profit_threshold"] / 100.0
         exclude_initial_days = cfg["aggregation"].get("exclude_initial_days", 0)
         exclude_based_on = cfg["aggregation"].get("exclude_based_on", "monitor_date")
-        trend_window = cfg["aggregation"].get("trend_window", 7)
+        trend_window = cfg["aggregation"].get("trend_window", 30)
         date_format = cfg["format"]["date_format"]
         group_col = resolve_group_column(cfg, cols)
 
@@ -1330,11 +1330,11 @@ class App:
             EXCLUDE_BASED_ON_VALUE_MAP.get(based_on, "监控日期")
         )
         self.group_by_var.set(self.config["aggregation"]["group_by"])
-        self.trend_window_var.set(self.config["aggregation"].get("trend_window", 7))
+        self.trend_window_var.set(self.config["aggregation"].get("trend_window", 30))
         self.output_mode_var.set(self.config.get("output_mode", "detail"))
         self._refresh_group_by_combo()
         self.log(
-            f"UI已刷新: 阈值={self.config['aggregation']['profit_threshold']}, 趋势窗口={self.config['aggregation'].get('trend_window', 7)}"
+            f"UI已刷新: 阈值={self.config['aggregation']['profit_threshold']}, 趋势窗口={self.config['aggregation'].get('trend_window', 30)}"
         )
 
     def _enable_drag_drop(self):
@@ -1449,7 +1449,7 @@ class App:
             self.update_progress(90, "正在导出CSV...")
 
             output_mode_text = "聚合模式" if is_aggregated else "详细模式"
-            trend_window = cfg["aggregation"].get("trend_window", 7)
+            trend_window = cfg["aggregation"].get("trend_window", 30)
             exclude_days = cfg["aggregation"].get("exclude_initial_days", 0)
             exclude_based_on_display = EXCLUDE_BASED_ON_VALUE_MAP.get(
                 cfg["aggregation"].get("exclude_based_on", "monitor_date"), "监控日期"

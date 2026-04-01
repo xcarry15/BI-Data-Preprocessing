@@ -405,7 +405,7 @@ def _format_editor(cfg):
                 cfg["aggregation"]["trend_window"] = st.number_input(
                     label,
                     min_value=2,
-                    value=int(cfg["aggregation"].get("trend_window", 30)),
+                    value=int(cfg["aggregation"].get("trend_window", 7)),
                     step=1,
                     key="trend_window",
                 )
@@ -452,7 +452,7 @@ st.session_state["cfg"] = cfg
 strategy_text = (
     f"模式: {'聚合' if cfg.get('output_mode') == 'aggregated' else '详细'} | "
     f"阈值: {cfg['aggregation'].get('profit_threshold', 50)}% | "
-    f"趋势窗口: {cfg['aggregation'].get('trend_window', 30)}天 | "
+    f"趋势窗口: {cfg['aggregation'].get('trend_window', 7)}天 | "
     f"排除: {cfg['aggregation'].get('exclude_initial_days', 0)}天"
 )
 with strategy_slot.container():

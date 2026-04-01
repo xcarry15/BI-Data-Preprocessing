@@ -40,7 +40,7 @@
     "exclude_initial_days": 60,
     "exclude_based_on": "opening_date",
     "group_by": "门店编码",
-    "trend_window": 15,
+    "trend_window": 30,
     "output_mode": "detail"
   }
 }
