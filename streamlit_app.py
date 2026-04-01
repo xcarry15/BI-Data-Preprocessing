@@ -352,8 +352,12 @@ with left:
     if uploaded is not None:
         st.caption(f"已选择: {uploaded.name}")
         suffix = os.path.splitext(uploaded.name)[1] or ".xlsx"
-        detected_columns = detect_columns(uploaded.getvalue(), suffix)
-        st.caption(f"检测到 {len(detected_columns)} 列")
+        try:
+            detected_columns = detect_columns(uploaded.getvalue(), suffix)
+            st.caption(f"检测到 {len(detected_columns)} 列")
+        except Exception as exc:
+            detected_columns = []
+            st.warning(f"列检测失败，请手动配置列映射后再处理。错误: {exc}")
     run_btn = st.button(
         "开始处理",
         type="primary",

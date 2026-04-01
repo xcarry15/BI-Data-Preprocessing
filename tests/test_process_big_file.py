@@ -91,6 +91,24 @@ class TestExcelReadOptimization(unittest.TestCase):
         self.assertIn("engine_kwargs", second_kwargs)
         self.assertNotIn("engine_kwargs", third_kwargs)
 
+    @patch("process_big_file.pd.read_excel")
+    def test_xls_falls_back_to_xlrd_when_other_engines_unavailable(self, mock_read_excel):
+        expected = pd.DataFrame({"A": ["1"]})
+        mock_read_excel.side_effect = [
+            ValueError("unknown engine calamine"),
+            ImportError("openpyxl missing"),
+            ImportError("openpyxl missing"),
+            expected,
+        ]
+
+        df, meta = read_excel_text_table("dummy.xls")
+
+        self.assertEqual(df.shape, (1, 1))
+        self.assertEqual(meta["strategy"], "xlrd")
+        self.assertEqual(mock_read_excel.call_count, 4)
+        last_kwargs = mock_read_excel.call_args_list[3].kwargs
+        self.assertEqual(last_kwargs["engine"], "xlrd")
+
 
 class TestExcelColumnReadOptimization(unittest.TestCase):
     @patch("process_big_file.pd.read_excel")

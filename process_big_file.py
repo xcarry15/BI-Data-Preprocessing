@@ -234,6 +234,7 @@ def _read_excel_with_fallback(path, base_kwargs):
     if not HAS_PANDAS:
         raise RuntimeError("缺少 pandas 库，请运行: pip install pandas")
 
+    ext = os.path.splitext(str(path))[1].lower()
     strategies = [
         ("calamine", {"engine": "calamine"}),
         (
@@ -241,8 +242,10 @@ def _read_excel_with_fallback(path, base_kwargs):
             {"engine": "openpyxl", "engine_kwargs": {"read_only": True, "data_only": True}},
         ),
         ("openpyxl_basic", {"engine": "openpyxl"}),
-        ("pandas_default", {}),
     ]
+    if ext == ".xls":
+        strategies.append(("xlrd", {"engine": "xlrd"}))
+    strategies.append(("pandas_default", {}))
     errors = []
 
     for strategy, extra_kwargs in strategies:
