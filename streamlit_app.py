@@ -213,7 +213,7 @@ st.markdown(
   <div class="hero-main">
     <h1 class="hero-title">BI 数据预处理工具</h1>
     <div class="hero-sub">面向数据分析场景的批量清洗与聚合工作台</div>
-    <div class="hero-meta">v2.0</div>
+    <div class="hero-meta">v0.0.7</div>
   </div>
 </div>
 """,
