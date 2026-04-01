@@ -28,6 +28,13 @@ st.markdown(
     --title: #10223c;
     --badge: #345d9f;
     --heading: #173157;
+    --input-border: #6d8fc7;
+    --input-bg: #f3f8ff;
+    --input-hover: #4e74b2;
+    --input-focus: #1b57ad;
+    --input-focus-ring: rgba(27, 87, 173, 0.2);
+    --input-select-bg: #eef6ff;
+    --input-number-bg: #f4f9ff;
 }
 .stApp {
     background: linear-gradient(180deg, #f4f7fc 0%, #f1f5fb 100%);
@@ -96,13 +103,45 @@ div[data-testid="stNumberInput"] input,
 div[data-testid="stSelectbox"] > div > div {
     min-height: 34px;
     border-radius: 8px;
+    border: 1.5px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+div[data-testid="stTextInput"] input:hover,
+div[data-testid="stNumberInput"] input:hover,
+div[data-testid="stSelectbox"] > div > div:hover {
+    border-color: var(--input-hover);
+    background: #ffffff;
+}
+div[data-testid="stTextInput"]:focus-within input,
+div[data-testid="stNumberInput"]:focus-within input,
+div[data-testid="stSelectbox"]:focus-within > div > div {
+    border-color: var(--input-focus);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+div[data-testid="stNumberInput"] input {
+    background: var(--input-number-bg);
+}
+div[data-testid="stSelectbox"] > div > div {
+    background: var(--input-select-bg);
+}
+div[data-testid="stFileUploaderDropzone"] {
+    border-color: #8ba7d4;
+    background: #edf5ff;
+}
+div[data-testid="stFileUploaderDropzone"]:hover {
+    border-color: var(--input-hover);
+    background: #e6f1ff;
 }
 div[data-testid="stTextInput"] label,
 div[data-testid="stNumberInput"] label,
 div[data-testid="stSelectbox"] label,
 div[data-testid="stCheckbox"] label {
     font-size: 0.82rem;
-    color: var(--muted);
+    color: #456290;
+    font-weight: 600;
 }
 button[kind="primary"] {
     background: var(--accent);
