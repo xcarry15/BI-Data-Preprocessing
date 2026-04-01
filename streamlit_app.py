@@ -98,9 +98,9 @@ div[data-testid="stFileUploaderDropzone"] {
     background: #f6f9ff;
     padding: 0.46rem 0.54rem;
 }
-div[data-testid="stTextInput"] input,
-div[data-testid="stNumberInput"] input,
-div[data-testid="stSelectbox"] > div > div {
+div[data-testid="stTextInput"] [data-baseweb="input"],
+div[data-testid="stNumberInput"] [data-baseweb="input"],
+div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
     min-height: 34px;
     border-radius: 8px;
     border: 1.5px solid var(--input-border);
@@ -108,23 +108,37 @@ div[data-testid="stSelectbox"] > div > div {
     color: var(--text);
     transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
-div[data-testid="stTextInput"] input:hover,
-div[data-testid="stNumberInput"] input:hover,
-div[data-testid="stSelectbox"] > div > div:hover {
+div[data-testid="stTextInput"] [data-baseweb="input"]:hover,
+div[data-testid="stNumberInput"] [data-baseweb="input"]:hover,
+div[data-testid="stSelectbox"] [data-baseweb="select"] > div:hover {
     border-color: var(--input-hover);
     background: #ffffff;
 }
-div[data-testid="stTextInput"]:focus-within input,
-div[data-testid="stNumberInput"]:focus-within input,
-div[data-testid="stSelectbox"]:focus-within > div > div {
+div[data-testid="stTextInput"]:focus-within [data-baseweb="input"],
+div[data-testid="stNumberInput"]:focus-within [data-baseweb="input"],
+div[data-testid="stSelectbox"]:focus-within [data-baseweb="select"] > div {
     border-color: var(--input-focus);
     background: #ffffff;
     box-shadow: 0 0 0 3px var(--input-focus-ring);
 }
-div[data-testid="stNumberInput"] input {
+div[data-testid="stTextInput"] [data-baseweb="input"] input,
+div[data-testid="stNumberInput"] [data-baseweb="input"] input {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text);
+}
+div[data-testid="stNumberInput"] [data-baseweb="input"] {
     background: var(--input-number-bg);
 }
-div[data-testid="stSelectbox"] > div > div {
+div[data-testid="stNumberInput"] [data-baseweb="input"] button {
+    background: transparent !important;
+    color: #3a537a !important;
+}
+div[data-testid="stNumberInput"] [data-baseweb="input"] button:hover {
+    background: #e8f1ff !important;
+}
+div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
     background: var(--input-select-bg);
 }
 div[data-testid="stFileUploaderDropzone"] {
